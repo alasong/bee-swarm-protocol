@@ -84,6 +84,51 @@ Run the full demo:
 python examples/swarm_coordination.py
 ```
 
+## Competitive Landscape
+
+Bee Swarm Protocol sits in the multi-agent coordination space alongside several established frameworks. Here's how it compares:
+
+### Comparison Matrix
+
+| Feature | Bee Swarm Protocol | OpenAI Swarm | CrewAI | AutoGen / AG2 | LangGraph |
+|---------|:-:|:-:|:-:|:-:|:-:|
+| **Coordination model** | Emergent consensus | Handoff | Role assignment | Conversational | State graph |
+| **Biomimetic signals** | Waggle dance language | None | None | None | None |
+| **Distance-based propagation** | Inverse-square decay | N/A | N/A | N/A | N/A |
+| **Time decay** | Exponential signal decay | N/A | N/A | N/A | N/A |
+| **Goal emergence** | Auto-emerged from state | Manual | Pre-assigned | Pre-assigned | Explicit |
+| **Consensus mechanism** | STRONG / WEAK / NONE | None | Voting (simple) | Group chat | State-based |
+| **Decentralization** | Signal-driven, emergent | Centralized orchestrator | Centralized orchestrator | Centralized orchestrator | Centralized orchestrator |
+| **Zero external deps** | Yes | Yes | No | No | No |
+| **Stars** | New | ~10k+ | ~20k+ | ~30k+ | ~15k+ |
+
+### Key Differentiators
+
+#### 1. Waggle Dance Signaling
+Unlike role-based or handoff-based frameworks, Bee Swarm Protocol encodes discovery quality into a **dance intensity** signal (`0.4*confidence + 0.3*impact + 0.3*novelty`), mirroring how honeybees communicate resource quality. Other frameworks use direct assignment — here, signals *compete* for attention.
+
+#### 2. Distance-Aware Propagation
+Signals propagate through a spatial model with **inverse-square decay**. Agents closer to the source receive stronger signals, creating natural priority ordering without explicit configuration. This is unique among multi-agent frameworks.
+
+#### 3. Emergent Goals, Not Assigned Roles
+Where CrewAI assigns roles (Researcher, Writer, Reviewer) and Swarm uses handoffs, Bee Swarm Protocol **derives goals from system state analysis** — high load triggers resource optimization goals, blocked agents trigger coordination goals. The system self-organizes rather than following a pre-programmed org chart.
+
+#### 4. Consensus with Uncertainty
+The `STRONG / WEAK / NONE` consensus model explicitly represents uncertainty — when no pattern reaches the threshold, the system knows to request more exploration. Most frameworks force a binary decision.
+
+### When to Choose Bee Swarm Protocol
+
+- **Exploratory/swarm intelligence** scenarios where agents discover and signal findings rather than execute predefined tasks
+- **Decentralized coordination** where you want agents to self-organize based on signal strength, not central orchestration
+- **Real-time adaptive systems** where goals emerge from conditions rather than being statically assigned
+- **Research and prototyping** of bio-inspired multi-agent algorithms
+
+### When to Choose Alternatives
+
+- **Production LLM applications** → AutoGen or CrewAI (more mature, larger ecosystems)
+- **Complex workflow orchestration** → LangGraph (stateful graph-based control flow)
+- **Simple multi-agent routing** → OpenAI Swarm (minimal, easy to understand)
+
 ## Architecture
 
 ```
