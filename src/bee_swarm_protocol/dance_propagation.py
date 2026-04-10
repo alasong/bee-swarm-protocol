@@ -258,9 +258,8 @@ class DancePropagator:
 
     async def _bus_broadcast_dance(self, dance: Dance) -> None:
         """Publish dance signal to the message bus as a broadcast."""
-        await self.bus.send(
+        await self.bus.broadcast(
             from_agent=self.source_agent_id,
-            to_agent="broadcast",
             message={
                 "type": "dance",
                 "dance_id": dance.dance_id,
