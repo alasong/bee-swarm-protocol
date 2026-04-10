@@ -235,19 +235,24 @@ class SwarmCheckpointMixin:
     def restore(self, cp: SwarmStateCheckpoint) -> None:
         """Restore state from a SwarmStateCheckpoint.
 
-        Restores state on any sub-components found via _get_sub_components().
+        Clears existing state and resets counters to checkpoint values.
         """
         components = self._get_sub_components()
 
         # Restore parser state
         parser = components.get("parser")
-        if parser is not None and cp.parser_state:
+        if parser is not None:
             if hasattr(parser, "_dances"):
                 parser._dances.clear()
             if hasattr(parser, "_pattern_weights"):
                 parser._pattern_weights = PatternWeights()
+                for pattern_type, weight in cp.pattern_weights.items():
+                    count = cp.pattern_support_counts.get(pattern_type, 1)
+                    if count > 0:
+                        parser._pattern_weights.weights[pattern_type] = weight
+                        parser._pattern_weights.support_counts[pattern_type] = count
             if hasattr(parser, "_dance_counter"):
-                parser._dance_counter = 0
+                parser._dance_counter = cp.dance_count
             if hasattr(parser, "intensity_threshold"):
                 parser.intensity_threshold = cp.parser_state.get(
                     "intensity_threshold", 0.5
@@ -258,12 +263,12 @@ class SwarmCheckpointMixin:
         if consensus is not None:
             if hasattr(consensus, "_consensus_history"):
                 consensus._consensus_history.clear()
-            if hasattr(consensus, "_consensus_counter"):
-                consensus._consensus_counter = 0
             if hasattr(consensus, "threshold"):
                 consensus.threshold = cp.consensus_threshold
             if hasattr(consensus, "min_participants"):
                 consensus.min_participants = cp.consensus_min_participants
+            if hasattr(consensus, "_consensus_counter"):
+                consensus._consensus_counter = len(cp.consensus_history)
 
         # Restore emerger state
         emerger = components.get("emerger")

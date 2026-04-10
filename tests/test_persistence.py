@@ -287,10 +287,10 @@ class TestSwarmCheckpointMixin:
         })
         assert len(obj.parser._dances) == 2
 
-        # Restore to checkpoint (state is cleared for fresh restart)
+        # Restore to checkpoint (state is restored to checkpoint values)
         obj.restore(cp_before)
-        assert len(obj.parser._dances) == 0  # cleared by restore
-        assert obj.parser._dance_counter == 0
+        assert len(obj.parser._dances) == 0  # dances cleared (not serialized)
+        assert obj.parser._dance_counter == 1  # restored to cp.dance_count
 
     def test_restore_clears_consensus_state(self):
         class MixinWithConsensus(SwarmCheckpointMixin):
@@ -311,8 +311,8 @@ class TestSwarmCheckpointMixin:
         assert len(obj.consensus._consensus_history) == 3
 
         obj.restore(cp_before)
-        assert len(obj.consensus._consensus_history) == 0  # cleared by restore
-        assert obj.consensus._consensus_counter == 0
+        assert len(obj.consensus._consensus_history) == 0  # history cleared
+        assert obj.consensus._consensus_counter == 2  # restored to len(consensus_history)
 
     def test_restore_clears_emerger_state(self):
         class MixinWithEmerger(SwarmCheckpointMixin):
