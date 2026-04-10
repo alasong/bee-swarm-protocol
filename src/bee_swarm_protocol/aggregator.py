@@ -139,9 +139,8 @@ class SignalAggregator:
             resource_usage=signal.get("resource_usage", {}),
         )
         if self.bus is not None:
-            await self.bus.send(
+            await self.bus.broadcast(
                 from_agent=self.source_agent_id,
-                to_agent="broadcast",
                 message={
                     "type": "state_report",
                     "agent_id": agent_id,
@@ -188,9 +187,8 @@ class SignalAggregator:
             agent_id=signal.get("agent_id", "unknown"),
         ))
         if self.bus is not None:
-            await self.bus.send(
+            await self.bus.broadcast(
                 from_agent=self.source_agent_id,
-                to_agent="broadcast",
                 message={
                     "type": "discovery",
                     "discovery_id": discovery_id,
@@ -228,9 +226,8 @@ class SignalAggregator:
             resource_availability=signal.get("resource_availability", {}),
         ))
         if self.bus is not None:
-            await self.bus.send(
+            await self.bus.broadcast(
                 from_agent=self.source_agent_id,
-                to_agent="broadcast",
                 message={
                     "type": "task_request",
                     "request_id": request_id,

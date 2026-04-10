@@ -338,7 +338,8 @@ class TestSwarmCheckpointMixin:
         assert len(obj.emerger._goals) == 2
 
         obj.restore(cp_before)
-        assert len(obj.emerger._goals) == 0  # cleared by restore
+        assert len(obj.emerger._goals) == 0
+        assert obj.emerger._goal_counter == 1  # restored from checkpoint
 
     def test_restore_clears_aggregator_state(self):
         class MixinWithAggregator(SwarmCheckpointMixin):
@@ -399,7 +400,8 @@ class TestSwarmCheckpointMixin:
         assert len(algo._consensus_history) == 3
 
         algo.restore(cp)
-        assert len(algo._consensus_history) == 0  # cleared by restore
+        assert len(algo._consensus_history) == 0
+        assert algo._consensus_counter == 2  # restored from checkpoint
 
     def test_mixin_with_multiple_inheritance_emerger(self):
         """Mixin works with GoalEmerger via multiple inheritance."""
@@ -424,4 +426,5 @@ class TestSwarmCheckpointMixin:
         assert len(emerger._goals) == 2
 
         emerger.restore(cp)
-        assert len(emerger._goals) == 0  # cleared by restore
+        assert len(emerger._goals) == 0
+        assert emerger._goal_counter == 1  # restored from checkpoint
