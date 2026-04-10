@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.10"
 authors = [
-    { name = "FiAgent Team" },
+    { name = "Alasong" },
 ]
 keywords = ["swarm", "bee", "agent", "coordination", "consensus", "dance-language", "multi-agent"]
 classifiers = [
@@ -24,7 +24,10 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: System :: Distributed Computing",
 ]
-dependencies = []
+dependencies = [
+    "agent-message-bus>=0.1.0",
+    "dashscope>=1.0.0",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -32,14 +35,12 @@ dev = [
     "pytest-asyncio>=0.21",
     "ruff>=0.1.0",
 ]
-messaging = [
-    "agent-message-bus>=0.1.0",
-]
+messaging = []
 
 [project.urls]
-Homepage = "https://github.com/fiagent/bee-swarm-protocol"
-Repository = "https://github.com/fiagent/bee-swarm-protocol"
-"Bug Tracker" = "https://github.com/fiagent/bee-swarm-protocol/issues"
+Homepage = "https://github.com/alasong/bee-swarm-protocol"
+Repository = "https://github.com/alasong/bee-swarm-protocol"
+"Bug Tracker" = "https://github.com/alasong/bee-swarm-protocol/issues"
 
 [tool.ruff]
 line-length = 100

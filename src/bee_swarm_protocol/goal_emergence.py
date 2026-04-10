@@ -1,7 +1,7 @@
 """Goal emergence from aggregated signals and consensus."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
@@ -39,7 +39,7 @@ class SystemGoal:
     derived_from: Optional[str] = None  # Consensus ID
     sub_tasks: List[str] = field(default_factory=list)
     status: str = "pending"
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -218,3 +218,25 @@ class GoalEmerger:
                 goal.status = "completed"
                 return True
         return False
+
+    async def async_identify_needs(self, snapshot) -> List[SystemNeed]:
+        """Async variant of identify_needs."""
+        return self.identify_needs(snapshot)
+
+    async def async_generate_goal(
+        self, need: SystemNeed, consensus_result=None
+    ) -> SystemGoal:
+        """Async variant of generate_goal."""
+        return self.generate_goal(need, consensus_result)
+
+    async def async_decompose_goal(self, goal: SystemGoal) -> List[str]:
+        """Async variant of decompose_goal."""
+        return self.decompose_goal(goal)
+
+    async def async_emerge_goals(self, snapshot, consensus_result=None) -> List[SystemGoal]:
+        """Async variant of emerge_goals."""
+        return self.emerge_goals(snapshot, consensus_result)
+
+    async def async_complete_goal(self, goal_id: str) -> bool:
+        """Async variant of complete_goal."""
+        return self.complete_goal(goal_id)

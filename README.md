@@ -1,6 +1,6 @@
 # Bee Swarm Protocol
 
-[![CI](https://github.com/fiagent/bee-swarm-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/fiagent/bee-swarm-protocol/actions/workflows/ci.yml)
+[![CI](https://github.com/alasong/bee-swarm-protocol/actions/workflows/ci.yml/badge.svg)](https://github.com/alasong/bee-swarm-protocol/actions/workflows/ci.yml)
 [![PyPI version](https://img.shields.io/badge/pypi-v0.1.0-blue.svg)](https://pypi.org/project/bee-swarm-protocol/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -187,7 +187,7 @@ decayed_intensity = original_intensity * e^(-decay_rate * time_elapsed)
 
 ```bash
 # Clone and install
-git clone https://github.com/fiagent/bee-swarm-protocol.git
+git clone https://github.com/alasong/bee-swarm-protocol.git
 cd bee-swarm-protocol
 pip install -e ".[dev]"
 

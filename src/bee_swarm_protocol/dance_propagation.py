@@ -1,11 +1,59 @@
 """Dance propagation — distance-based signal spreading with intensity decay."""
 
 import math
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from agent_message_bus import MessageBus
 
 from bee_swarm_protocol.dance_signal import DanceSignal
+
+
+class DistanceMetric(ABC):
+    """Base class for configurable distance metrics."""
+
+    @abstractmethod
+    def calculate(self, x1: float, y1: float, x2: float, y2: float) -> float:
+        """Calculate distance between two points."""
+
+
+class EuclideanMetric(DistanceMetric):
+    """Standard Euclidean distance (default)."""
+
+    def calculate(self, x1: float, y1: float, x2: float, y2: float) -> float:
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+
+
+class ManhattanMetric(DistanceMetric):
+    """Manhattan (taxicab) distance: |x1-x2| + |y1-y2|."""
+
+    def calculate(self, x1: float, y1: float, x2: float, y2: float) -> float:
+        return abs(x1 - x2) + abs(y1 - y2)
+
+
+class ChebyshevMetric(DistanceMetric):
+    """Chebyshev distance: max(|x1-x2|, |y1-y2|)."""
+
+    def calculate(self, x1: float, y1: float, x2: float, y2: float) -> float:
+        return max(abs(x1 - x2), abs(y1 - y2))
+
+
+def _build_metric(metric: str) -> DistanceMetric:
+    """Factory: build a metric from a name string."""
+    metric_map: Dict[str, DistanceMetric] = {
+        "euclidean": EuclideanMetric(),
+        "manhattan": ManhattanMetric(),
+        "chebyshev": ChebyshevMetric(),
+    }
+    if metric.lower() not in metric_map:
+        raise ValueError(
+            f"Unknown distance metric: '{metric}'. "
+            f"Valid options: {list(metric_map.keys())}"
+        )
+    return metric_map[metric.lower()]
 
 
 @dataclass
@@ -26,7 +74,7 @@ class Response:
     dance_id: str
     agent_id: str
     response_data: Dict[str, Any]
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     attention_level: float = 0.0
 
 
@@ -57,7 +105,7 @@ class Dance:
     def is_expired(self) -> bool:
         if self.expiry_time is None:
             return False
-        return datetime.utcnow() > self.expiry_time
+        return datetime.now(timezone.utc) > self.expiry_time
 
 
 class DancePropagator:
@@ -75,11 +123,21 @@ class DancePropagator:
         intensity_multiplier: float = 50.0,
         min_radius: float = 10.0,
         max_radius: float = 500.0,
+        distance_metric: Optional[DistanceMetric | str] = None,
+        bus: Optional["MessageBus"] = None,
+        source_agent_id: str = "dance_propagator",
     ):
         self.default_radius = default_radius
         self.intensity_multiplier = intensity_multiplier
         self.min_radius = min_radius
         self.max_radius = max_radius
+        self.bus = bus
+        self.source_agent_id = source_agent_id
+
+        if isinstance(distance_metric, str):
+            self._distance_metric = _build_metric(distance_metric)
+        else:
+            self._distance_metric = distance_metric or EuclideanMetric()
 
         self._agent_locations: Dict[str, AgentLocation] = {}
         self._active_dances: Dict[str, Dance] = {}
@@ -150,10 +208,10 @@ class DancePropagator:
         return visible
 
     def _calculate_distance(self, loc1: Optional[AgentLocation], loc2: AgentLocation) -> float:
-        """Euclidean distance between two locations."""
+        """Distance between two locations using the configured metric."""
         if loc1 is None:
             return float("inf")
-        return math.sqrt((loc1.x - loc2.x) ** 2 + (loc1.y - loc2.y) ** 2)
+        return self._distance_metric.calculate(loc1.x, loc1.y, loc2.x, loc2.y)
 
     def _get_effective_radius(self, dance: Dance) -> float:
         """Effective propagation radius based on intensity."""
@@ -186,3 +244,46 @@ class DancePropagator:
     def get_all_active_dances(self) -> List[Dance]:
         """Get all active (non-expired) dances."""
         return [d for d in self._active_dances.values() if not d.is_expired]
+
+    async def async_propagate(self, dance: Dance, target_agents: List[str]) -> Dict[str, float]:
+        """Async variant of propagate."""
+        return self.propagate(dance, target_agents)
+
+    async def async_broadcast(self, dance: Dance) -> Dict[str, float]:
+        """Async variant of broadcast. Publishes to bus if available."""
+        results = self.propagate(dance, list(self._agent_locations.keys()))
+        if self.bus is not None:
+            await self._bus_broadcast_dance(dance)
+        return results
+
+    async def _bus_broadcast_dance(self, dance: Dance) -> None:
+        """Publish dance signal to the message bus as a broadcast."""
+        await self.bus.send(
+            from_agent=self.source_agent_id,
+            to_agent="broadcast",
+            message={
+                "type": "dance",
+                "dance_id": dance.dance_id,
+                "agent_id": dance.signal.agent_id,
+                "intensity": dance.original_intensity,
+                "direction": dance.signal.direction,
+                "duration": dance.signal.duration,
+                "pattern": dance.signal.pattern,
+            },
+        )
+
+    async def async_get_visible_dances(self, agent_id: str) -> List[Dance]:
+        """Async variant of get_visible_dances."""
+        return self.get_visible_dances(agent_id)
+
+    def set_distance_metric(self, metric: DistanceMetric | str) -> None:
+        """Change the distance metric at runtime."""
+        if isinstance(metric, str):
+            self._distance_metric = _build_metric(metric)
+        else:
+            self._distance_metric = metric
+
+    @property
+    def distance_metric(self) -> DistanceMetric:
+        """Return the current distance metric."""
+        return self._distance_metric

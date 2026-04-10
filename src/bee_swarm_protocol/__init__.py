@@ -30,17 +30,31 @@ from bee_swarm_protocol.aggregator import (
     SystemStateSnapshot,
     TaskRequestInfo,
 )
+from bee_swarm_protocol.bee_agent import (
+    AgentRole,
+    AgentState,
+    BeeAgent,
+    CoordinatorAgent,
+    ExecutorAgent,
+    ExplorerAgent,
+)
 from bee_swarm_protocol.consensus import (
+    ByzantineFaultTolerance,
     ConsensusAlgorithm,
     ConsensusResult,
     ConsensusType,
+    WeightedConsensusAlgorithm,
 )
 from bee_swarm_protocol.dance_decay import DanceDecay
 from bee_swarm_protocol.dance_parser import DanceLanguageParser, PatternWeights
 from bee_swarm_protocol.dance_propagation import (
     AgentLocation,
+    ChebyshevMetric,
     Dance,
     DancePropagator,
+    DistanceMetric,
+    EuclideanMetric,
+    ManhattanMetric,
     Response,
 )
 from bee_swarm_protocol.dance_response import DanceResponseHandler
@@ -53,6 +67,13 @@ from bee_swarm_protocol.goal_emergence import (
     SystemGoal,
     SystemNeed,
 )
+from bee_swarm_protocol.llm_agent import (
+    DashScopeAgent,
+    LLMBeeAgent,
+    LLMDanceParser,
+    SwarmLLMConfig,
+)
+from bee_swarm_protocol.llm_integration import DashScopeClient, DanceLLMAnalyzer, LLMResponse
 
 __version__ = "0.1.0"
 
@@ -66,6 +87,10 @@ __all__ = [
     "AgentLocation",
     "Dance",
     "Response",
+    "DistanceMetric",
+    "EuclideanMetric",
+    "ManhattanMetric",
+    "ChebyshevMetric",
     # Dance handling
     "DanceResponseHandler",
     "DanceDecay",
@@ -80,10 +105,28 @@ __all__ = [
     "ConsensusAlgorithm",
     "ConsensusResult",
     "ConsensusType",
+    "ByzantineFaultTolerance",
+    "WeightedConsensusAlgorithm",
     # Goal emergence
     "GoalEmerger",
     "SystemGoal",
     "SystemNeed",
     "GoalType",
     "GoalPriority",
+    # LLM integration
+    "DashScopeClient",
+    "DanceLLMAnalyzer",
+    "LLMResponse",
+    # LLM agents
+    "SwarmLLMConfig",
+    "DashScopeAgent",
+    "LLMDanceParser",
+    "LLMBeeAgent",
+    # BeeAgent runtime
+    "AgentRole",
+    "AgentState",
+    "BeeAgent",
+    "ExplorerAgent",
+    "ExecutorAgent",
+    "CoordinatorAgent",
 ]

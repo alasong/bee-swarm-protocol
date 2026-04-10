@@ -2,7 +2,7 @@
 
 import math
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from bee_swarm_protocol.dance_signal import DanceSignal
@@ -14,7 +14,7 @@ class PatternWeights:
 
     weights: Dict[str, float] = field(default_factory=dict)
     support_counts: Dict[str, int] = field(default_factory=dict)
-    last_update: datetime = field(default_factory=datetime.utcnow)
+    last_update: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
 
     def get_weight(self, pattern_type: str) -> float:
         """Get the weight for a pattern type."""
@@ -106,7 +106,7 @@ class DanceLanguageParser:
 
         self._pattern_weights.weights[direction] = new_weight
         self._pattern_weights.support_counts[direction] = new_count
-        self._pattern_weights.last_update = datetime.utcnow()
+        self._pattern_weights.last_update = datetime.now(timezone.utc)
 
     def accumulate_dances(self) -> Dict[str, float]:
         """
@@ -142,3 +142,15 @@ class DanceLanguageParser:
         """Get top N patterns by weight."""
         weights = self.accumulate_dances()
         return sorted(weights.items(), key=lambda x: x[1], reverse=True)[:n]
+
+    async def async_parse_discovery(self, discovery: Dict[str, Any]) -> Optional[DanceSignal]:
+        """Async variant of parse_discovery."""
+        return self.parse_discovery(discovery)
+
+    async def async_accumulate_dances(self) -> Dict[str, float]:
+        """Async variant of accumulate_dances."""
+        return self.accumulate_dances()
+
+    async def async_get_top_patterns(self, n: int = 5) -> List[tuple]:
+        """Async variant of get_top_patterns."""
+        return self.get_top_patterns(n)

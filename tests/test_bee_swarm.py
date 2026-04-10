@@ -1,7 +1,7 @@
 """Tests for bee-swarm-protocol."""
 
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -219,7 +219,7 @@ class TestDanceDecay:
         signal = DanceSignal("d1", "src", intensity=0.1, direction="t", duration=1.0)
         dance = Dance(signal=signal, location=AgentLocation("src", x=0, y=0))
         # Manually set timestamp to 10 seconds ago
-        dance.signal.timestamp = datetime.utcnow() - timedelta(seconds=10)
+        dance.signal.timestamp = datetime.now(timezone.utc) - timedelta(seconds=10)
         prop.propagate(dance, [])
 
         removed = decay.cleanup_expired_dances()

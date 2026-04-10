@@ -100,3 +100,11 @@ class DanceVisualizer:
         self._max_x = max_x
         self._min_y = min_y
         self._max_y = max_y
+
+    async def async_visualize(self, dances: List[Dance]) -> str:
+        """Async variant of visualize."""
+        return self.visualize(dances)
+
+    async def async_get_heat_map(self) -> Dict[str, float]:
+        """Async variant of get_heat_map."""
+        return self.get_heat_map()

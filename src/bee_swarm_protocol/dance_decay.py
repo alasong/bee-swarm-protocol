@@ -1,7 +1,7 @@
 """Time-based decay for dance intensity with automatic cleanup."""
 
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from bee_swarm_protocol.dance_propagation import Dance, DancePropagator
@@ -43,7 +43,7 @@ class DanceDecay:
 
         if dance.decayed_intensity < self._expiry_threshold:
             if dance.expiry_time is None:
-                dance.expiry_time = datetime.utcnow()
+                dance.expiry_time = datetime.now(timezone.utc)
 
         return dance
 
@@ -68,7 +68,7 @@ class DanceDecay:
         """Seconds since dance creation."""
         if dance.signal.timestamp is None:
             return 0.0
-        return (datetime.utcnow() - dance.signal.timestamp).total_seconds()
+        return (datetime.now(timezone.utc) - dance.signal.timestamp).total_seconds()
 
     def get_decay_status(self, dance: Dance) -> Dict[str, Any]:
         """Get decay status for a dance."""
@@ -86,3 +86,11 @@ class DanceDecay:
                 else 0.0
             ),
         }
+
+    async def async_apply_decay(self, dance: Dance, time_elapsed: float) -> Dance:
+        """Async variant of apply_decay."""
+        return self.apply_decay(dance, time_elapsed)
+
+    async def async_cleanup_expired_dances(self) -> List[str]:
+        """Async variant of cleanup_expired_dances."""
+        return self.cleanup_expired_dances()

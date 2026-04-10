@@ -1,7 +1,7 @@
 """DanceSignal data model — the fundamental unit of swarm communication."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 
@@ -31,4 +31,4 @@ class DanceSignal:
     direction: str  # pattern type or direction
     duration: float  # relative duration
     pattern: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))

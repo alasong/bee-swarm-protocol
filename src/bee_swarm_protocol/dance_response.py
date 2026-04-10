@@ -1,7 +1,10 @@
 """Dance response handling — agent responses, aggregation, and attention tracking."""
 
 from collections import defaultdict
-from typing import Any, Callable, Dict, List
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+
+if TYPE_CHECKING:
+    from agent_message_bus import MessageBus
 
 from bee_swarm_protocol.dance_propagation import Dance, DancePropagator, Response
 
@@ -10,16 +13,24 @@ class DanceResponseHandler:
     """
     Handles agent responses to dances.
 
-    - Response handler registration per agent
+    - Response handler registration per agent (callback-based, backward compatible)
+    - Bus-based response reception (when bus is provided)
     - Response aggregation (count, attention, confidence)
     - Attention tracking based on dance intensity
     """
 
-    def __init__(self, propagator: DancePropagator):
+    def __init__(
+        self,
+        propagator: DancePropagator,
+        bus: Optional["MessageBus"] = None,
+        source_agent_id: str = "response_handler",
+    ):
         self._propagator = propagator
         self._response_handlers: Dict[str, Callable] = {}
         self._response_counter = 0
         self._responses_by_dance: Dict[str, List[Response]] = defaultdict(list)
+        self.bus = bus
+        self.source_agent_id = source_agent_id
 
     def register_response_handler(self, agent_id: str, handler: Callable) -> None:
         """Register a callable to handle dance responses for an agent."""
@@ -104,3 +115,17 @@ class DanceResponseHandler:
     def clear_responses(self, dance_id: str) -> None:
         """Clear all responses for a dance."""
         self._responses_by_dance.pop(dance_id, None)
+
+    async def async_respond_to_dance(
+        self, agent_id: str, dance: Dance, response: Dict[str, Any]
+    ) -> Response:
+        """Async variant of respond_to_dance."""
+        return self.respond_to_dance(agent_id, dance, response)
+
+    async def async_get_responses(self, dance_id: str) -> List[Response]:
+        """Async variant of get_responses."""
+        return self.get_responses(dance_id)
+
+    async def async_get_aggregated_response(self, dance_id: str) -> Dict[str, Any]:
+        """Async variant of get_aggregated_response."""
+        return self.get_aggregated_response(dance_id)
