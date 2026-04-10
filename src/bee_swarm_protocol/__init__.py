@@ -73,7 +73,7 @@ from bee_swarm_protocol.llm_agent import (
     LLMDanceParser,
     SwarmLLMConfig,
 )
-from bee_swarm_protocol.llm_integration import DashScopeClient, DanceLLMAnalyzer, LLMResponse
+from bee_swarm_protocol.llm_integration import DanceLLMAnalyzer, DashScopeClient, LLMResponse
 
 __version__ = "0.1.0"
 

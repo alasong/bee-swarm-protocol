@@ -78,6 +78,52 @@ class DanceResponseHandler:
 
         return resp
 
+    async def async_respond_to_dance(
+        self, agent_id: str, dance: Dance, response: Dict[str, Any]
+    ) -> Response:
+        """Async variant of respond_to_dance. Publishes to bus if available."""
+        resp = self.respond_to_dance(agent_id, dance, response)
+        if self.bus is not None:
+            await self.bus.send(
+                from_agent=agent_id,
+                to_agent=self.source_agent_id,
+                message={
+                    "type": "dance_response",
+                    "dance_id": dance.dance_id,
+                    "agent_id": agent_id,
+                    "response_id": resp.response_id,
+                    "response_data": response,
+                    "attention_level": resp.attention_level,
+                },
+            )
+        return resp
+
+    async def receive_response_from_bus(
+        self, agent_id: str, timeout: float = 0.0
+    ) -> Optional[Response]:
+        """
+        Receive a response from the message bus for a specific agent.
+
+        The caller must ensure the bus has agents registered.
+        Returns a Response if a message is available, None otherwise.
+        """
+        if self.bus is None:
+            return None
+        msg = await self.bus.receive(agent_id, timeout=timeout)
+        if msg is None:
+            return None
+        content = msg.content
+        dance_id = content.get("dance_id", "")
+        resp = Response(
+            response_id=content.get("response_id", msg.message_id),
+            dance_id=dance_id,
+            agent_id=content.get("agent_id", agent_id),
+            response_data=content.get("response_data", {}),
+            attention_level=content.get("attention_level", 0.0),
+        )
+        self._responses_by_dance[dance_id].append(resp)
+        return resp
+
     def get_responses(self, dance_id: str) -> List[Response]:
         """Get all responses for a dance, sorted by attention (highest first)."""
         responses = self._responses_by_dance.get(dance_id, [])
@@ -115,12 +161,6 @@ class DanceResponseHandler:
     def clear_responses(self, dance_id: str) -> None:
         """Clear all responses for a dance."""
         self._responses_by_dance.pop(dance_id, None)
-
-    async def async_respond_to_dance(
-        self, agent_id: str, dance: Dance, response: Dict[str, Any]
-    ) -> Response:
-        """Async variant of respond_to_dance."""
-        return self.respond_to_dance(agent_id, dance, response)
 
     async def async_get_responses(self, dance_id: str) -> List[Response]:
         """Async variant of get_responses."""

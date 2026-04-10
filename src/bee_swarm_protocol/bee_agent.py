@@ -13,11 +13,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from agent_message_bus import MessageBus
 
+from bee_swarm_protocol.aggregator import SignalAggregator, SystemStateSnapshot
 from bee_swarm_protocol.consensus import ConsensusAlgorithm, ConsensusResult
 from bee_swarm_protocol.dance_parser import DanceLanguageParser
 from bee_swarm_protocol.goal_emergence import GoalEmerger, SystemGoal
-from bee_swarm_protocol.aggregator import SignalAggregator, SystemStateSnapshot
-
 
 logger = logging.getLogger(__name__)
 
@@ -336,7 +335,6 @@ class ExplorerAgent(BeeAgent):
         Accumulates weights internally so the explorer can correlate
         its own discoveries with signals from peers.
         """
-        direction = dance_signal.get("direction", "unknown")
         intensity = dance_signal.get("intensity", 0.0)
         # Update the parser with this peer signal for weight tracking
         self.parser.parse_discovery({

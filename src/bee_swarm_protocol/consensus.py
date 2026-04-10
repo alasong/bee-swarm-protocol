@@ -1,10 +1,9 @@
 """Consensus formation from accumulated dance weights."""
 
+import statistics
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-import math
-import statistics
 from typing import Any, Dict, List, Optional, Set
 
 
